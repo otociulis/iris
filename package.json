@@ -16,8 +16,10 @@
     "browserify": "^10.2.4",
     "gulp": "^3.9.0",
     "gulp-mocha": "^2.1.1",
-    "tsd": "^0.6.1",
-    "should": "^7.0.1"
+    "gulp-rename": "^1.2.2",
+    "gulp-uglify": "^1.2.0",
+    "should": "^7.0.1",
+    "tsd": "^0.6.1"
   },
   "keywords": [
     "event",
@@ -25,6 +27,5 @@
   ],
   "main": "./iris.js",
   "license": "MIT",
-  "dependencies": {
-  }
+  "dependencies": {}
 }

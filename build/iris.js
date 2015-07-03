@@ -1,3 +1,4 @@
+"use strict";
 define(["require", "exports"], function (require, exports) {
     var Reference = (function () {
         function Reference(messageType, registerForSubclasses, callback, parentObject) {
@@ -12,8 +13,8 @@ define(["require", "exports"], function (require, exports) {
     var Message = (function () {
         function Message(childNames) {
             this._childNames = childNames;
-            var registered = false;
             var self = this;
+            var registered = false;
             _hierarchy.forEach(function (x) {
                 registered = x[x.length - 1] === self.type ? true : registered;
             });
@@ -46,9 +47,9 @@ define(["require", "exports"], function (require, exports) {
     var _callbacks = [];
     var _hierarchy = [];
     ;
-    function register(messageType, options, callback) {
-        var haveOptions = (typeof options !== "undefined" && options !== null);
-        _callbacks.push(new Reference(messageType, haveOptions ? options.registerForSubclasses : false, callback, haveOptions ? options.thisArg : null));
+    function register(message, callback) {
+        var msg = typeof message === "string" ? { type: message } : message;
+        _callbacks.push(new Reference(msg.type, msg.registerForSubclasses || false, callback, msg.thisArg || null));
     }
     exports.register = register;
     function unregister(messageTypeOrTarget) {
@@ -72,29 +73,39 @@ define(["require", "exports"], function (require, exports) {
         }
     }
     exports.unregister = unregister;
-    function send(message) {
+    function send(message, body) {
         var hier = null;
-        _hierarchy.forEach(function (x) {
-            hier = x[x.length - 1] === message.type ? x : hier;
-        });
+        var haveBody = typeof body !== "undefined";
+        var type, description;
+        if (typeof message === "string") {
+            type = message;
+            hier = [type];
+        }
+        else {
+            type = message.type;
+            description = message.description;
+            _hierarchy.forEach(function (x) {
+                hier = x[x.length - 1] === type ? x : hier;
+            });
+        }
         if (null != hier) {
-            console.log("Sending message " + message.type + ": " + message.description);
+            console.log("Sending message " + type + ": " + description);
             _callbacks.forEach(function (c) {
                 var typesToCheck = c.registerForSubclasses ? hier : hier.slice(hier.length - 1, hier.length);
                 typesToCheck.forEach(function (messageType) {
                     if (c.messageType === messageType) {
                         if (c.parentObject == null) {
-                            c.callback(message);
+                            c.callback(haveBody ? body : message);
                         }
                         else {
-                            c.callback.bind(c.parentObject)(message);
+                            c.callback.bind(c.parentObject)(haveBody ? body : message);
                         }
                     }
                 });
             });
         }
         else {
-            console.log("No such message registered: " + message.type);
+            console.log("No such message registered: " + type);
         }
     }
     exports.send = send;

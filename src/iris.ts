@@ -1,16 +1,36 @@
+"use strict";
+
 class Reference
 {
 	constructor(public messageType: string, public registerForSubclasses: boolean, public callback: Function, public parentObject: any = null) { }
 }
 
-export class Message {
+export interface IMessage {
+	type: string;
+	description?: string;
+	isLogging?: boolean;
+}
+
+export interface IRegistrationOptions {
+	type: string;
+	registerForSubclasses?: boolean;
+	thisArg?: any;
+};
+
+export interface IOptions {
+	logError: (message:string) => void;
+	logMessage: (message: string) => void;
+}
+
+export class Message implements IMessage {
 	private _childNames: string[];
 	
 	constructor(childNames: string[]) {
 		this._childNames = childNames;
-		var registered = false;
-		var self = this;
 		
+		var self = this;
+		var registered = false;
+	
 		_hierarchy.forEach(x => {
 			registered = x[x.length - 1] === self.type ? true : registered;
 		});
@@ -28,25 +48,27 @@ export class Message {
 	
 	get type(): string { return this._childNames[this._childNames.length - 1]; }
 	get description(): string { return ""; }
+	get isLogging(): boolean { return true; }
 }
 
 var _callbacks: Array<Reference> = [];
 var _hierarchy: Array<string[]> = [];
 
-export interface RegistrationOptions {
-	registerForSubclasses?: boolean;
-	thisArg?: any;
+export var options: IOptions = {
+	logError: (message: string) => { console.log(message); },
+	logMessage: (message: string) => { console.log(message); }	
 };
 
-export function register<T extends Message>(messageType: string, options: RegistrationOptions, callback?: (message: T) => void): void {
-	var haveOptions =  (typeof options !== "undefined" && options !== null);
-	_callbacks.push(new Reference(messageType, 
-		haveOptions ? options.registerForSubclasses : false, 
+export function register<T extends IMessage>(message: string|IRegistrationOptions, callback: (message: T) => void): void {
+	var msg: IRegistrationOptions = typeof message === "string" ? { type: message } : message;
+		
+	_callbacks.push(new Reference(msg.type, 
+		msg.registerForSubclasses || false, 
 		callback, 
-		haveOptions ? options.thisArg: null));
+		msg.thisArg || null));
 }	
 
-export function unregister<T extends Message>(messageTypeOrTarget: string|any = undefined): void {
+export function unregister<T extends IMessage>(messageTypeOrTarget: string|any = undefined): void {
 	if (typeof messageTypeOrTarget === "undefined" || messageTypeOrTarget === null) {
 		_callbacks = [];
 	} else {
@@ -67,14 +89,26 @@ export function unregister<T extends Message>(messageTypeOrTarget: string|any = 
 	}
 }
 	
-export function send<T extends Message>(message: T): void {
+export function send<T extends IMessage>(message: T|string, body?: any): void {
 	var hier: string[] = null;
-	_hierarchy.forEach(x => {
-		hier = x[x.length - 1] === message.type ? x : hier;
-	});
+	var haveBody = typeof body !== "undefined";
+	var msg: IMessage;
+	
+	if (typeof message === "string") {
+		msg = { type: message, isLogging: true, description: null };
+		hier = [message];
+	} else {
+		msg = message;
 		
+		_hierarchy.forEach(x => {
+			hier = x[x.length - 1] === msg.type ? x : hier;
+		});
+	}
+
 	if (null != hier) {
-		console.log("Sending message " +  message.type + ": " + message.description);
+		if (msg.isLogging) {
+			options.logMessage("Sending message " +  msg.type + ": " + msg.description);
+		}
 		
 		_callbacks.forEach(c => {
 			var typesToCheck: string[] = c.registerForSubclasses ? hier : hier.slice(hier.length - 1, hier.length);
@@ -82,14 +116,14 @@ export function send<T extends Message>(message: T): void {
 			typesToCheck.forEach(messageType => {
 				if (c.messageType === messageType) {
 					if (c.parentObject == null) {
-						c.callback(message);
+						c.callback(haveBody ? body : message);
 					} else {
-						c.callback.bind(c.parentObject)(message);
+						c.callback.bind(c.parentObject)(haveBody ? body : message);
 					}
 				}
 			});
 		});
 	} else {
-		console.log("No such message registered: " + message.type);
+		options.logError("No such message registered: " + msg.type);
 	}
 }

@@ -1,6 +1,8 @@
 var gulp = require('gulp');
 var ts = require('gulp-typescript');
 var mocha = require('gulp-mocha');
+var uglify = require('gulp-uglify');
+var rename = require('gulp-rename');
 
 gulp.task('default', function () {
   return gulp.src('src/*.ts')
@@ -9,7 +11,10 @@ gulp.task('default', function () {
     target: "ES5",
     module: "amd"
   }))
-    .pipe(gulp.dest('build'));
+  .pipe(gulp.dest('build'))
+  .pipe(uglify())
+  .pipe(rename({ extname: '.min.js' }))
+  .pipe(gulp.dest('build'));
 });
 
 gulp.task('test', function () {

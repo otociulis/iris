@@ -35,9 +35,9 @@ class Target {
   get lastMyDerivedMessage(): MyDerivedMessage { return this._lastMyDerivedMessage; }
   
   constructor() {
-    iris.register(MyMessage.name, { thisArg: this }, this.OnMyMessage);
-    iris.register(MyDerivedMessage.name, { thisArg: this, registerForSubclasses: true }, this.OnMyMessageOrDerived);
-    iris.register(MyDerivedMessage.name, { thisArg: this }, this.OnMyDerivedMessage);
+    iris.register({ type: MyMessage.name, thisArg: this }, this.OnMyMessage);
+    iris.register({ type: MyDerivedMessage.name, thisArg: this, registerForSubclasses: true }, this.OnMyMessageOrDerived);
+    iris.register({ type: MyDerivedMessage.name, thisArg: this }, this.OnMyDerivedMessage);
   }
   
   private OnMyMessage(msg: MyMessage): void {
@@ -60,10 +60,20 @@ describe('Iris', () => {
     should.equal(message.description, "false,1");
   }),
   
+  it("Supports simple string interface", () => {
+    var receivedMessage: iris.IMessage = null;
+    
+    iris.register("myMessage", (msg: iris.IMessage) => { receivedMessage = msg });
+    iris.send("myMessage", true);
+    iris.unregister();
+    
+    should.notEqual(receivedMessage, null); 
+  }),
+  
   it("Doesn't receive messages after unregister all", () => {
       var receivedMessage: MyMessage = null;
       
-      iris.register(MyMessage.name, null, (msg: MyMessage) => { receivedMessage = msg; });
+      iris.register(MyMessage.name, (msg: MyMessage) => { receivedMessage = msg; });
       iris.unregister();
       
       iris.send(new MyMessage(true));      
@@ -75,7 +85,7 @@ describe('Iris', () => {
     it('does receive direct message', () => {
       var receivedMessage: MyMessage = null;
       
-      iris.register(MyMessage.name, null, (msg: MyMessage) => { receivedMessage = msg; });
+      iris.register(MyMessage.name, (msg: MyMessage) => { receivedMessage = msg; });
       iris.send(new MyMessage(true));      
       iris.unregister();
      
@@ -84,7 +94,7 @@ describe('Iris', () => {
     it("doesn't receive direct message after unregistrering", () => {
       var receivedMessage: MyMessage = null;
       
-      iris.register(MyMessage.name, null, (msg: MyMessage) => { receivedMessage = msg; });
+      iris.register(MyMessage.name, (msg: MyMessage) => { receivedMessage = msg; });
       iris.unregister(MyMessage.name);
       
       iris.send(new MyMessage(true));      
@@ -94,7 +104,7 @@ describe('Iris', () => {
     it("doesn't receive derived message if not subscribed", () => {
       var receivedMessage: MyMessage = null;
       
-      iris.register(MyMessage.name, null, (msg: MyMessage) => { receivedMessage = msg; });
+      iris.register(MyMessage.name, (msg: MyMessage) => { receivedMessage = msg; });
       iris.send(new MyDerivedMessage(true, 1));    
       iris.unregister();  
      
@@ -103,7 +113,7 @@ describe('Iris', () => {
     it("does receive derived message if subscribed", () => {
       var receivedMessage: MyMessage = null;
       
-      iris.register(MyMessage.name, { registerForSubclasses: true }, (msg: MyMessage) => { receivedMessage = msg; });
+      iris.register({ type: MyMessage.name, registerForSubclasses: true }, (msg: MyMessage) => { receivedMessage = msg; });
       iris.send(new MyDerivedMessage(true, 1));  
       iris.unregister();    
      
@@ -154,5 +164,4 @@ describe('Iris', () => {
       should.notEqual(target.lastMyMessageOrDerived, null); 
     })
   })
-  
-})
+});

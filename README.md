@@ -5,12 +5,12 @@
 
 Iris is a simple message dispatch framework intendent to support message driven development in Javascript. Main idea behind message driven development is that application components communicate together via well-defined, immutable messages instead of calling methods on each other.
 
-For example, sample application (see `Samples`) wishes to display current date and time in HTML web page. In this case we can identify two components: 
+For example, sample application (see [HelloTime](./build/samples/hellotime) sample) wishes to display current date and time in HTML web page. In this case we can identify two components: 
 
 * date publishing component sending new date and time in regular intervals
 * rendering component displaying date and time in user format
 
-Date publishing component (`datetimeserver.js`):
+Date publishing component ([datetimeserver.js](./build/samples/hellotime/datetimeserver.js)):
 
 ```javascript
   var iris = require("iris");
@@ -20,13 +20,13 @@ Date publishing component (`datetimeserver.js`):
   }, 1000);
 ```
 
-Rendering component (`timecontrol.js`):
+Rendering component ([timecontrol.js](./build/samples/hellotime/timecontrol.js)):
 
 ```javascript
   var iris = require("iris");
   
   iris.register("dateTimeUpdated", function(date) {
-    document.getElementById("time").innerText = date.toString();
+    document.getElementById("dateTime").innerText = date.toString();
   });
 ```
 

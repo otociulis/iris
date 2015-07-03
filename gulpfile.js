@@ -9,7 +9,7 @@ gulp.task('default', function () {
     target: "ES5",
     module: "amd"
   }))
-    .pipe(gulp.dest('out'));
+    .pipe(gulp.dest('build'));
 });
 
 gulp.task('test', function () {
@@ -19,7 +19,7 @@ gulp.task('test', function () {
     target: "ES5",
     module: "commonjs"
   }))
-    .pipe(gulp.dest('out'))
+    .pipe(gulp.dest('build_tests'))
   // gulp-mocha needs filepaths so you can't have any plugins before it 
     .pipe(mocha({ reporter: 'nyan' }));
 });

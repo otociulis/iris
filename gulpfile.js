@@ -28,7 +28,7 @@ gulp.task('default', ["copy_samples"], function () {
 });
 
 gulp.task('test', function () {
-  return gulp.src('src/**/*.ts')
+  return gulp.src(['src/**/*.ts', "!src/samples/**/*"])
     .pipe(ts({
     noImplicitAny: true,
     target: "ES5",

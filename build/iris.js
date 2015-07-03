@@ -10,6 +10,7 @@ define(["require", "exports"], function (require, exports) {
         }
         return Reference;
     })();
+    ;
     var Message = (function () {
         function Message(childNames) {
             this._childNames = childNames;
@@ -41,12 +42,26 @@ define(["require", "exports"], function (require, exports) {
             enumerable: true,
             configurable: true
         });
+        Object.defineProperty(Message.prototype, "isLogging", {
+            get: function () {
+                return true;
+            },
+            enumerable: true,
+            configurable: true
+        });
         return Message;
     })();
     exports.Message = Message;
     var _callbacks = [];
     var _hierarchy = [];
-    ;
+    exports.options = {
+        logError: function (message) {
+            console.log(message);
+        },
+        logMessage: function (message) {
+            console.log(message);
+        }
+    };
     function register(message, callback) {
         var msg = typeof message === "string" ? { type: message } : message;
         _callbacks.push(new Reference(msg.type, msg.registerForSubclasses || false, callback, msg.thisArg || null));
@@ -76,20 +91,21 @@ define(["require", "exports"], function (require, exports) {
     function send(message, body) {
         var hier = null;
         var haveBody = typeof body !== "undefined";
-        var type, description;
+        var msg;
         if (typeof message === "string") {
-            type = message;
-            hier = [type];
+            msg = { type: message, isLogging: true, description: null };
+            hier = [message];
         }
         else {
-            type = message.type;
-            description = message.description;
+            msg = message;
             _hierarchy.forEach(function (x) {
-                hier = x[x.length - 1] === type ? x : hier;
+                hier = x[x.length - 1] === msg.type ? x : hier;
             });
         }
         if (null != hier) {
-            console.log("Sending message " + type + ": " + description);
+            if (msg.isLogging) {
+                exports.options.logMessage("Sending message " + msg.type + ": " + msg.description);
+            }
             _callbacks.forEach(function (c) {
                 var typesToCheck = c.registerForSubclasses ? hier : hier.slice(hier.length - 1, hier.length);
                 typesToCheck.forEach(function (messageType) {
@@ -105,7 +121,7 @@ define(["require", "exports"], function (require, exports) {
             });
         }
         else {
-            console.log("No such message registered: " + type);
+            exports.options.logError("No such message registered: " + msg.type);
         }
     }
     exports.send = send;

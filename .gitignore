@@ -2,3 +2,6 @@
 /npm-debug.log
 /build_tests
 /.settings
+/.coverdata
+/debug
+/testoutput

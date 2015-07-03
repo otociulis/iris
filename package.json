@@ -13,11 +13,17 @@
   },
   "devDependencies": {
     "browserify": "^10.2.4",
+    "coveralls": "^2.11.2",
     "gulp": "^3.9.0",
+    "gulp-coverage": "^0.3.36",
+    "gulp-coveralls": "^0.1.4",
+    "gulp-debug": "^2.0.1",
     "gulp-mocha": "^2.1.1",
     "gulp-rename": "^1.2.2",
     "gulp-typescript": "^2.7.8",
     "gulp-uglify": "^1.2.0",
+    "jscoverage": "^0.5.9",
+    "mocha-lcov-reporter": "0.0.2",
     "should": "^7.0.1",
     "tsd": "^0.6.1"
   },

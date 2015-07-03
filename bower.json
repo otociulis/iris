@@ -1,0 +1,23 @@
+{
+  "name": "iris",
+  "version": "0.0.0",
+  "homepage": "https://github.com/otociulis/iris",
+  "authors": [
+    "Oto Ciulis <oto.ciulis@ixonos.com>"
+  ],
+  "main": "build/iris.js",
+  "moduleType": [
+    "amd"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "requirejs": "~2.1.18"
+  }
+}

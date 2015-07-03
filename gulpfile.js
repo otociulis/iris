@@ -6,9 +6,15 @@ var rename = require('gulp-rename');
 var coveralls = require('gulp-coveralls');
 var cover  = require('gulp-coverage');
 var debug = require('gulp-debug');
+var filter = require('gulp-filter');
 
-gulp.task('default', function () {
-  return gulp.src('src/*.ts')
+gulp.task("copy_samples", function() {
+  return gulp.src("samples_html/**/*")
+  .pipe(gulp.dest("build/samples"));
+});
+
+gulp.task('default', ["copy_samples"], function () {
+  return gulp.src(['src/**/*.ts', "!src/tests/*"])
     .pipe(ts({
     noImplicitAny: true,
     target: "ES5",
@@ -16,6 +22,7 @@ gulp.task('default', function () {
   }))
   .pipe(gulp.dest('build'))
   .pipe(uglify())
+  .pipe(filter("iris.js"))
   .pipe(rename({ extname: '.min.js' }))
   .pipe(gulp.dest('build'));
 });

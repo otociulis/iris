@@ -2,7 +2,6 @@
 define(["require", "exports"], function (require, exports) {
     var Reference = (function () {
         function Reference(messageType, registerForSubclasses, callback, parentObject) {
-            if (parentObject === void 0) { parentObject = null; }
             this.messageType = messageType;
             this.registerForSubclasses = registerForSubclasses;
             this.callback = callback;
@@ -31,13 +30,6 @@ define(["require", "exports"], function (require, exports) {
         Object.defineProperty(Message.prototype, "type", {
             get: function () {
                 return this._childNames[this._childNames.length - 1];
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(Message.prototype, "description", {
-            get: function () {
-                return "";
             },
             enumerable: true,
             configurable: true
@@ -92,8 +84,9 @@ define(["require", "exports"], function (require, exports) {
         var hier = null;
         var haveBody = typeof body !== "undefined";
         var msg;
+        var haveReceivers = false;
         if (typeof message === "string") {
-            msg = { type: message, isLogging: true, description: null };
+            msg = { type: message, isLogging: true, description: null, parentObject: null };
             hier = [message];
         }
         else {
@@ -116,11 +109,12 @@ define(["require", "exports"], function (require, exports) {
                         else {
                             c.callback.bind(c.parentObject)(haveBody ? body : message);
                         }
+                        haveReceivers = true;
                     }
                 });
             });
         }
-        else {
+        if (!haveReceivers) {
             exports.options.logError("No such message registered: " + msg.type);
         }
     }

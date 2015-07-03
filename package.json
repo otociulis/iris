@@ -18,6 +18,7 @@
     "gulp-coverage": "^0.3.36",
     "gulp-coveralls": "^0.1.4",
     "gulp-debug": "^2.0.1",
+    "gulp-filter": "^2.0.2",
     "gulp-mocha": "^2.1.1",
     "gulp-rename": "^1.2.2",
     "gulp-typescript": "^2.7.8",

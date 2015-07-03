@@ -9,8 +9,7 @@
   },
   "homepage": "https://github.com/otociulis/iris",
   "scripts": {
-    "test": "mocha -R mocha-better-spec-reporter --check-leaks ./test/*.test.js ./test/**/*.test.js",
-    "browser": "gulp script"
+    "test": "gulp test"
   },
   "devDependencies": {
     "browserify": "^10.2.4",
@@ -25,7 +24,7 @@
     "event",
     "data"
   ],
-  "main": "./iris.js",
+  "main": "./build/iris.js",
   "license": "MIT",
   "dependencies": {}
 }

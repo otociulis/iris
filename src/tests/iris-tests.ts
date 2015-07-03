@@ -28,6 +28,9 @@ class Target {
   private _lastMyMessage: MyMessage;
   get lastMyMessage(): MyMessage { return this._lastMyMessage; }
   
+  private _lastSimpleMessage: iris.IMessage;
+  get lastSimpleMessage(): iris.IMessage { return this._lastSimpleMessage; }
+  
   private _lastMyMessageOrDerived: MyMessage;
   get lastMyMessageOrDerived(): MyMessage { return this._lastMyMessageOrDerived; }
   
@@ -38,6 +41,7 @@ class Target {
     iris.register({ type: MyMessage.name, thisArg: this }, this.OnMyMessage);
     iris.register({ type: MyDerivedMessage.name, thisArg: this, registerForSubclasses: true }, this.OnMyMessageOrDerived);
     iris.register({ type: MyDerivedMessage.name, thisArg: this }, this.OnMyDerivedMessage);
+    iris.register({ type: "myMessage", thisArg: this}, this.OnSimpleMessage);
   }
   
   private OnMyMessage(msg: MyMessage): void {
@@ -51,37 +55,48 @@ class Target {
   private OnMyMessageOrDerived(msg: MyDerivedMessage): void {
     this._lastMyMessageOrDerived = msg;
   }
+  
+  private OnSimpleMessage(msg: iris.IMessage): void {
+    this._lastSimpleMessage = msg;
+  }
 }
 
 describe('Iris', () => {
-  it("Correctly handle message type", () => {
-    var message = new MyDerivedMessage(false, 1);
-    should.equal(message.type, "MyDerivedMessage");
-    should.equal(message.description, "false,1");
-  }),
-  
-  it("Supports simple string interface", () => {
-    var receivedMessage: iris.IMessage = null;
-    
-    iris.register("myMessage", (msg: iris.IMessage) => { receivedMessage = msg });
-    iris.send("myMessage", true);
-    iris.unregister();
-    
-    should.notEqual(receivedMessage, null); 
-  }),
-  
-  it("Doesn't receive messages after unregister all", () => {
-      var receivedMessage: MyMessage = null;
-      
-      iris.register(MyMessage.name, (msg: MyMessage) => { receivedMessage = msg; });
+  describe ("Basic behavior", () => {
+    it("Correctly handle message type", () => {
+      var message = new MyDerivedMessage(false, 1);
+      should.equal(message.type, "MyDerivedMessage");
+      should.equal(message.description, "false,1");
       iris.unregister();
-      
-      iris.send(new MyMessage(true));      
-     
-      should.equal(receivedMessage, null); 
+    }),
+    
+    it("Don't fail on unknown messsage", () => {
+      iris.send("myUnknownMessage", true);
+      iris.unregister();
+    }),
+    
+    it("Doesn't receive messages after unregister all", () => {
+        var receivedMessage: MyMessage = null;
+        
+        iris.register(MyMessage.name, (msg: MyMessage) => { receivedMessage = msg; });
+        iris.unregister();
+        
+        iris.send(new MyMessage(true));      
+       
+        should.equal(receivedMessage, null); 
+    })
   }),
   
   describe('Registration without target object', () => {
+    it("Supports simple string interface", () => {
+      var receivedMessage: iris.IMessage = null;
+      
+      iris.register("myMessage", (msg: iris.IMessage) => { receivedMessage = msg });
+      iris.send("myMessage", true);
+      iris.unregister();
+      
+      should.notEqual(receivedMessage, null); 
+    }),
     it('does receive direct message', () => {
       var receivedMessage: MyMessage = null;
       
@@ -122,6 +137,14 @@ describe('Iris', () => {
   }),
   
   describe('Registration with target object', () => {
+    it("Supports simple string interface", () => {
+      var target = new Target();
+      
+      iris.send("myMessage", true);
+      iris.unregister();
+      
+      should.equal(target.lastSimpleMessage, true); 
+    }),
     it('does receive direct message', () => {
       var target = new Target();
       

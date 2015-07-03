@@ -2,7 +2,7 @@
 
 class Reference
 {
-	constructor(public messageType: string, public registerForSubclasses: boolean, public callback: Function, public parentObject: any = null) { }
+	constructor(public messageType: string, public registerForSubclasses: boolean, public callback: Function, public parentObject: any) { }
 }
 
 export interface IMessage {
@@ -47,7 +47,6 @@ export class Message implements IMessage {
 	}
 	
 	get type(): string { return this._childNames[this._childNames.length - 1]; }
-	get description(): string { return ""; }
 	get isLogging(): boolean { return true; }
 }
 
@@ -93,9 +92,10 @@ export function send<T extends IMessage>(message: T|string, body?: any): void {
 	var hier: string[] = null;
 	var haveBody = typeof body !== "undefined";
 	var msg: IMessage;
+	var haveReceivers = false;
 	
 	if (typeof message === "string") {
-		msg = { type: message, isLogging: true, description: null };
+		msg = { type: message, isLogging: true, description: null, parentObject: null };
 		hier = [message];
 	} else {
 		msg = message;
@@ -120,10 +120,14 @@ export function send<T extends IMessage>(message: T|string, body?: any): void {
 					} else {
 						c.callback.bind(c.parentObject)(haveBody ? body : message);
 					}
+					
+					haveReceivers = true;
 				}
 			});
 		});
-	} else {
+	} 
+	
+	if (!haveReceivers) {
 		options.logError("No such message registered: " + msg.type);
 	}
 }

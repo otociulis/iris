@@ -20,6 +20,12 @@ export class Message {
 		}
 	}
 	
+	derive(childNames: string[], name: string): string[] {
+		var result = childNames.slice(0);
+		result.splice(0, 0, name);
+		return result;
+	}
+	
 	get type(): string { return this._childNames[this._childNames.length - 1]; }
 	get description(): string { return ""; }
 }
@@ -27,16 +33,38 @@ export class Message {
 var _callbacks: Array<Reference> = [];
 var _hierarchy: Array<string[]> = [];
 
-export function register<T extends Message>(messageType: string, registerForSubclasses: boolean,  parentObject: any, callback: (message: T) => void): void {
-	_callbacks.push(new Reference(messageType, registerForSubclasses, callback, parentObject));
-}
+export interface RegistrationOptions {
+	registerForSubclasses?: boolean;
+	thisArg?: any;
+};
 
-export function registerDirect<T extends Message>(messageType: string, parentObject: any, callback: (message: T) => void): void {
-	_callbacks.push(new Reference(messageType, true, callback, parentObject));
-}
+export function register<T extends Message>(messageType: string, options: RegistrationOptions, callback?: (message: T) => void): void {
+	var haveOptions =  (typeof options !== "undefined" && options !== null);
+	_callbacks.push(new Reference(messageType, 
+		haveOptions ? options.registerForSubclasses : false, 
+		callback, 
+		haveOptions ? options.thisArg: null));
+}	
 
-export function registerSubClasses<T extends Message>(messageType: string, parentObject: any, callback: (message: T) => void): void {
-	_callbacks.push(new Reference(messageType, true, callback, parentObject));
+export function unregister<T extends Message>(messageTypeOrTarget: string|any = undefined): void {
+	if (typeof messageTypeOrTarget === "undefined" || messageTypeOrTarget === null) {
+		_callbacks = [];
+	} else {
+		var messageIndex = -1;
+		
+		do {
+			messageIndex = -1;
+			_callbacks.forEach((c, index) => {
+				if (c.messageType == messageTypeOrTarget || c.parentObject == messageTypeOrTarget) {
+					messageIndex = index;
+				}
+			});
+			
+			if (messageIndex != -1) {
+				_callbacks.splice(messageIndex, 1);
+			}
+		} while (messageIndex != -1);
+	}
 }
 	
 export function send<T extends Message>(message: T): void {
@@ -49,7 +77,7 @@ export function send<T extends Message>(message: T): void {
 		console.log("Sending message " +  message.type + ": " + message.description);
 		
 		_callbacks.forEach(c => {
-			var typesToCheck: string[] = c.registerForSubclasses ? hier.slice(hier.length - 1, hier.length) : hier;
+			var typesToCheck: string[] = c.registerForSubclasses ? hier : hier.slice(hier.length - 1, hier.length);
 			
 			typesToCheck.forEach(messageType => {
 				if (c.messageType === messageType) {

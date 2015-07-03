@@ -1,0 +1,30 @@
+{
+  "name": "iris",
+  "description": "messenger component for data-driven applications",
+  "version": "0.0.1",
+  "author": "Oto Ciulis <oto.ciulis@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/otociulis/iris.git"
+  },
+  "homepage": "https://github.com/otociulis/iris",
+  "scripts": {
+    "test": "mocha -R mocha-better-spec-reporter --check-leaks ./test/*.test.js ./test/**/*.test.js",
+    "browser": "gulp script"
+  },
+  "devDependencies": {
+    "browserify": "^10.2.4",
+    "gulp": "^3.9.0",
+    "gulp-mocha": "^2.1.1",
+    "tsd": "^0.6.1",
+    "should": "^7.0.1"
+  },
+  "keywords": [
+    "event",
+    "data"
+  ],
+  "main": "./iris.js",
+  "license": "MIT",
+  "dependencies": {
+  }
+}

@@ -1,4 +1,5 @@
 ![Travis CI](https://travis-ci.org/otociulis/iris.svg?branch=master)
+[![Coverage Status](https://coveralls.io/repos/otociulis/iris/badge.svg?branch=master)](https://coveralls.io/r/otociulis/iris?branch=master)
 
 # Overview
 

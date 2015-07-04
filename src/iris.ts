@@ -58,16 +58,30 @@ export var options: IOptions = {
 	logMessage: (message: string) => { console.log(message); }	
 };
 
-export function register<T extends IMessage>(message: string|IRegistrationOptions, callback: (message: T) => void): void {
+export interface IIris {
+	register<TRegister extends IMessage>(message: string|IRegistrationOptions, callback: (message: TRegister) => void): IIris;
+	unregister<TUnregister extends IMessage>(messageTypeOrTarget?: string|any): IIris;
+	send<TSend extends IMessage>(message: TSend|string, body?: any): IIris;
+}
+
+var self: IIris = {
+	register: register,
+	unregister: unregister,
+	send: send
+};
+
+export function register<T extends IMessage>(message: string|IRegistrationOptions, callback: (message: T) => void): IIris {
 	var msg: IRegistrationOptions = typeof message === "string" ? { type: message } : message;
 		
 	_callbacks.push(new Reference(msg.type, 
 		msg.registerForSubclasses || false, 
 		callback, 
 		msg.thisArg || null));
+		
+	return self;
 }	
 
-export function unregister<T extends IMessage>(messageTypeOrTarget: string|any = undefined): void {
+export function unregister<T extends IMessage>(messageTypeOrTarget: string|any = undefined): IIris {
 	if (typeof messageTypeOrTarget === "undefined" || messageTypeOrTarget === null) {
 		_callbacks = [];
 	} else {
@@ -86,9 +100,11 @@ export function unregister<T extends IMessage>(messageTypeOrTarget: string|any =
 			}
 		} while (messageIndex != -1);
 	}
+	
+	return self;
 }
 	
-export function send<T extends IMessage>(message: T|string, body?: any): void {
+export function send<T extends IMessage>(message: T|string, body?: any): IIris {
 	var hier: string[] = null;
 	var haveBody = typeof body !== "undefined";
 	var msg: IMessage;
@@ -130,4 +146,6 @@ export function send<T extends IMessage>(message: T|string, body?: any): void {
 	if (!haveReceivers) {
 		options.logError("No such message registered: " + msg.type);
 	}
+	
+	return self;
 }

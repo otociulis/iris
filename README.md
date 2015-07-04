@@ -34,3 +34,98 @@ This approach allows very loosely tied component development which automatically
 
 # API
 
+At core API consist of three methods:
+
+* register - registers for message
+* send - sends the message
+* unregister - unregisters receiver of message or message type
+
+All methods returns `iris` object allowing to chain requests; usefull when multiple `register` or `send` calls are needed:
+
+```javascript
+  iris.register("MyMessage", OnMyMessage)
+      .register("MyDerivedMessage", OnMyMessageOrDerived);
+```
+
+## Function register
+
+```javascript
+  function register(type, callback);
+```
+
+Parameters:
+* `type`: string -name of the message to register for
+* `callback`: Function - callback method to be invoked when message arrives. Callback method will receive one parameter with arguments sent by `send` function
+
+```javascript
+  function register(options, callback);
+```
+
+Parameters:
+* `options` - object allowing to fine-tune the behavior:
+  * `type`: string - name of the message to register for
+  * `registerForSubclasses`: boolean - indicates if `callback` should receive also messages derived from `type`
+  * `thisArg`: any - used to `bind` the call to `callback` to other object. Usefull when defining callback inside other class (see below for example)
+* `callback`: Function - callback method to be invoked when message arrives. Callback method will receive one parameter with arguments sent by `send` function
+
+To bind callback in other object use `thisArg` parameter:
+
+```javascript
+
+var Target = (function () {
+    function Target() {
+        iris.register({ type: MyMessage.name, thisArg: this }, this.OnMyMessage);
+    }
+    
+    function OnMyMessage(msg) {
+        // this will be correct context - instance of class Target
+    }
+}
+
+```
+
+## Function send
+
+```javascript
+  function send(type, body);
+```
+
+Parameters:
+* `type`: string - name of the message to send
+* `body`: any - object to be sent
+
+```javascript
+  function send(options);
+```
+Parameters:
+* `options` - object allowing to fine-tune the behavior:
+  * `type`: string - name of the message to send
+  * `isLogging`: boolean - indicates if message should be logged; usefull for performance improvements when particular message is sent many times
+  * `description`: string - additional information to be logged (e.g. context information)
+
+## Function unregister
+
+```javascript
+  function unregister(type);
+```
+
+Parameters:
+* `type`: string - name of the message to unregister from all receivers
+
+```javascript
+  function unregister(obj);
+```
+
+This call works only for messages registered using `thisArg` option.
+
+Parameters:
+* `obj`: any - instance of object from which to unregister all messages.
+
+```javascript
+  function unregister();
+```
+
+Unregisters all messages and all receivers.
+
+
+

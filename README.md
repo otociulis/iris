@@ -36,9 +36,9 @@ This approach allows very loosely tied component development which automatically
 
 At core API consist of three methods:
 
-* register - registers for message
-* send - sends the message
-* unregister - unregisters receiver of message or message type
+* `register` - registers for message
+* `send` - sends the message
+* `unregister` - unregisters receiver of message or message type
 
 All methods returns `iris` object allowing to chain requests; usefull when multiple `register` or `send` calls are needed:
 
@@ -127,5 +127,8 @@ Parameters:
 
 Unregisters all messages and all receivers.
 
+## Hierarchy of messages
+
+As application grows bigger it's possible to identify messages that share some data or the behavior can be specialized from same base class; for example 
 
 

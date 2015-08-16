@@ -3,6 +3,8 @@
 
 # Overview
 
+[![Join the chat at https://gitter.im/otociulis/iris](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/otociulis/iris?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 Iris is a simple message dispatch framework intendent to support message driven development in Javascript. Main idea behind message driven development is that application components communicate together via well-defined, immutable messages instead of calling methods on each other.
 
 For example, sample application (see [HelloTime](./build/samples/hellotime) sample) wishes to display current date and time in HTML web page. In this case we can identify two components: 
